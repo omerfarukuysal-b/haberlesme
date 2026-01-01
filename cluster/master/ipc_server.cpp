@@ -2,8 +2,8 @@
 #include "node_registry.h"
 #include "command_broker.h"
 #include "udp_listener.h"
-#include "common/mini_json.h"
-#include "common/protocol.h"
+#include "../common/mini_json.h"
+#include "../common/protocol.h"
 
 #include <arpa/inet.h>
 #include <sys/socket.h>

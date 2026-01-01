@@ -1,5 +1,5 @@
 #include "command_handler.h"
-#include "common/mini_json.h"
+#include "../common/mini_json.h"
 
 #include <unistd.h>
 #include <cstdio>

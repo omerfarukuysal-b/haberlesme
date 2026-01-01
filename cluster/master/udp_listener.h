@@ -2,8 +2,8 @@
 #include <netinet/in.h>
 #include <atomic>
 #include <cstdint>
-#include "common/runtime.h"
-#include "common/protocol.h"
+#include "../common/runtime.h"
+#include "../common/protocol.h"
 
 class NodeRegistry;
 class CommandBroker;

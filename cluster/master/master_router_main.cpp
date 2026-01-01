@@ -7,7 +7,7 @@
 #include <csignal>
 #include <iostream>
 #include <thread>
-#include "common/runtime.h"
+#include "../common/runtime.h"
 
 
 std::atomic<bool> g_running{true};

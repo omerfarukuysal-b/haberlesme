@@ -1,5 +1,5 @@
 #include "command_broker.h"
-#include "common/protocol.h"
+#include "../common/protocol.h"
 #include <thread>
 
 void CommandBroker::store_response(uint32_t replyToSeq, const std::string& responseJson) {
