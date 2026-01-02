@@ -113,6 +113,9 @@ async function refreshNodes() {
           <div>${badge}</div>
         </div>
         <div class="muted">${n.ip}:${n.port}</div>
+        <div style="font-size:0.85em; color:#0056b3; margin-top:4px;">
+           msg: ${escapeHtml(n.telemetry.message || '-')}
+        </div>
       `;
 
       root.appendChild(div);
