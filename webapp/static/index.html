@@ -21,9 +21,9 @@
   </style>
 </head>
 <body>
-  <h2>Raspberry Pi UDP Cluster</h2>
+  <h2>Mesh Network Control Panel</h2>
   <div class="muted">
-    Master üzerinden worker node'ları komutla ve telemetriyi izle.
+    Her node, ağdaki diğer tüm node'lara doğrudan komut gönderebilir ve alabilir.
   </div>
 
   <!-- NODE LIST -->
@@ -51,7 +51,7 @@
 
     <div class="row">
       <label>Target ID:</label>
-      <input id="target" type="number" value="2" min="1" max="255"/>
+      <input id="target" type="number" value="1" min="1" max="255"/>
 
       <label>Action:</label>
       <select id="action">
@@ -61,9 +61,9 @@
       </select>
 
       <label>Arg:</label>
-      <input id="arg" type="text" value="hi" />
+      <input id="arg" type="text" value="hello mesh" />
 
-      <button onclick="sendCmd()">Send</button>
+      <button onclick="sendCmd()">Send Command</button>
     </div>
 
     <pre id="cmdResult">{}</pre>
@@ -86,35 +86,32 @@ async function refreshNodes() {
     document.getElementById("status").innerText = "loading...";
     const res = await fetch("/api/nodes");
     const data = await res.json();
-    document.getElementById("status").innerText = data.ok ? "ok" : "error";
+    document.getElementById("status").innerText = data.nodes ? "ok" : "error";
 
     const root = document.getElementById("nodes");
     root.innerHTML = "";
 
-    if (!data.ok) {
+    if (!data.nodes) {
       root.innerText = JSON.stringify(data);
       return;
     }
 
-    // render node cards
+    // render node cards (mesh mode - tüm node'lar status döndürür)
     for (const n of data.nodes) {
-      const age = n.lastSeenMsAgo;
-      const online = age < 3000;
-
       const div = document.createElement("div");
       div.className = "card node-card" + ((selectedId === n.id) ? " selected" : "");
       div.style.cursor = "pointer";
       div.onclick = () => selectNode(n.id);
 
-      const hbStr = escapeHtml(JSON.stringify(n.heartbeat ?? {}));
-      const badge = `<span class="pill ${online ? "online" : "offline"}">${online ? "ONLINE ✅" : "OFFLINE ❌"}</span>`;
+      const status = n.status === "online" ? "ONLINE ✅" : "OFFLINE ❌";
+      const badge = `<span class="pill ${n.status === "online" ? "online" : "offline"}">${status}</span>`;
 
       div.innerHTML = `
         <div class="row" style="justify-content: space-between;">
-          <div><b>Node ${n.id}</b> ${badge}</div>
-          <div class="muted">lastSeen: ${age} ms</div>
+          <div><b>Node ${n.id}</b> (${n.hostname})</div>
+          <div>${badge}</div>
         </div>
-        <div class="muted">Heartbeat: ${hbStr}</div>
+        <div class="muted">${n.ip}:${n.port}</div>
       `;
 
       root.appendChild(div);
