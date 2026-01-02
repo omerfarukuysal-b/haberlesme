@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>RPI Cluster Control</title>
+  <style>
+    body { font-family: sans-serif; margin: 24px; }
+    .row { display:flex; gap:16px; align-items:center; margin:8px 0; }
+    .card { border:1px solid #ddd; border-radius:10px; padding:12px; margin:10px 0; }
+    .muted { color:#666; font-size: 0.9em; }
+    button { padding: 8px 10px; }
+    input { padding: 6px 8px; }
+    pre { background:#f6f6f6; padding:10px; border-radius:8px; overflow:auto; }
+  </style>
+</head>
+<body>
+  <h2>Raspberry Pi UDP Cluster</h2>
+  <div class="muted">Master üzerinden worker node'ları komutla (echo/hostname/uptime).</div>
+
+  <div class="card">
+    <div class="row">
+      <button onclick="refreshNodes()">Refresh</button>
+      <span id="status" class="muted"></span>
+    </div>
+    <div id="nodes"></div>
+  </div>
+
+  <div class="card">
+    <h3>Command</h3>
+    <div class="row">
+      <label>Target ID:</label>
+      <input id="target" type="number" value="2" min="1" max="255"/>
+      <label>Action:</label>
+      <select id="action">
+        <option value="hostname">hostname</option>
+        <option value="uptime">uptime</option>
+        <option value="echo">echo</option>
+      </select>
+      <label>Arg:</label>
+      <input id="arg" type="text" value="hi" />
+      <button onclick="sendCmd()">Send</button>
+    </div>
+    <pre id="result"></pre>
+  </div>
+
+<script>
+async function refreshNodes() {
+  document.getElementById("status").innerText = "loading...";
+  const res = await fetch("/api/nodes");
+  const data = await res.json();
+  document.getElementById("status").innerText = data.ok ? "ok" : "error";
+
+  const root = document.getElementById("nodes");
+  root.innerHTML = "";
+  if (!data.ok) {
+    root.innerText = JSON.stringify(data);
+    return;
+  }
+
+  for (const n of data.nodes) {
+    const div = document.createElement("div");
+    div.className = "card";
+    const age = n.lastSeenMsAgo;
+    const online = age < 3000;
+    div.innerHTML = `
+      <div><b>Node ${n.id}</b> — ${online ? "ONLINE ✅" : "OFFLINE ❌"} <span class="muted">(lastSeen ${age} ms ago)</span></div>
+      <div class="muted">Heartbeat: ${escapeHtml(JSON.stringify(n.heartbeat))}</div>
+    `;
+    root.appendChild(div);
+  }
+}
+
+async function sendCmd() {
+  const target = document.getElementById("target").value;
+  const action = document.getElementById("action").value;
+  const arg = document.getElementById("arg").value;
+
+  const qs = new URLSearchParams({target, action, arg});
+  const res = await fetch("/api/command?" + qs.toString(), { method: "POST" });
+  const data = await res.json();
+  document.getElementById("result").innerText = JSON.stringify(data, null, 2);
+}
+
+function escapeHtml(s) {
+  return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+}
+
+refreshNodes();
+setInterval(refreshNodes, 1000);
+</script>
+</body>
+</html>
+
