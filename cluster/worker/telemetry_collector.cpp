@@ -1,5 +1,5 @@
 #include "telemetry_collector.h"
-#include "common/protocol.h"
+#include "../common/protocol.h"
 #include <unistd.h>
 #include <cstdio>
 #include <string>

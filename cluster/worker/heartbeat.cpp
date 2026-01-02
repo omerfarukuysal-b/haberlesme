@@ -1,5 +1,5 @@
 #include "heartbeat.h"
-#include "common/telemetry.h"
+#include "../common/telemetry.h"
 #include "telemetry_collector.h"
 #include <unistd.h>
 

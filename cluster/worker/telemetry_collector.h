@@ -1,5 +1,5 @@
 #pragma once
-#include "common/telemetry.h"
+#include "../common/telemetry.h"
 
 class TelemetryCollector {
 public:
