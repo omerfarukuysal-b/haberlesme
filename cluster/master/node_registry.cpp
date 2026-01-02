@@ -45,7 +45,7 @@ std::string NodeRegistry::to_nodes_json(uint64_t nowMs) const {
 }
 
 
-bool NodeRegistry::get_telemetry_json(uint8_t id, std::string& outTelemetry, uint64_t& outAgeMs) const {
+bool NodeRegistry::get_telemetry_json(uint8_t id, std::string& outTelemetry, uint64_t& outAgeMs, uint64_t nowMs) const {
   std::lock_guard<std::mutex> lk(mu_);
   auto it = nodes_.find(id);
   if (it == nodes_.end()) return false;
