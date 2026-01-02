@@ -97,6 +97,20 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandH
     if (type == proto::MsgType::Heartbeat) {
       std::cout << "[Node " << (int)myId << "] Heartbeat from Node " << (int)pkt.hdr.senderId 
                 << " (" << remote_ip << ":" << remote_port << ") - Size: " << n << " bytes\n";
+
+      // --- BAŞLANGIÇ: BURAYI EKLEYİN ---
+      // Gelen heartbeat'i Web Sunucusuna da yönlendir (Relay)
+      if (!webServerIp.empty() && webServerPort > 0) {
+        sockaddr_in web_addr{};
+        web_addr.sin_family = AF_INET;
+        web_addr.sin_port = htons(webServerPort);
+        inet_pton(AF_INET, webServerIp.c_str(), &web_addr.sin_addr);
+        
+        // Gelen ham paketi (buf) olduğu gibi web sunucusuna ilet
+        ::sendto(sock_, buf.data(), n, 0, (sockaddr*)&web_addr, sizeof(web_addr));
+      }
+      // --- BİTİŞ ---
+
     } else if (type == proto::MsgType::Command) {
       std::cout << "[Node " << (int)myId << "] Command from Node " << (int)pkt.hdr.senderId 
                 << " (" << remote_ip << ":" << remote_port << "): " << pkt.payload << "\n";
