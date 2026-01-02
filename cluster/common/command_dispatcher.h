@@ -3,6 +3,7 @@
 #include <string>
 #include <mutex>
 #include <unordered_map>
+#include <atomic>
 #include <netinet/in.h>
 #include "../common/node_config.h"
 
