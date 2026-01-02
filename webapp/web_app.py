@@ -53,7 +53,8 @@ def start_heartbeat_listener():
             data, addr = listening_socket.recvfrom(4096)
             if len(data) >= 26:
                 # Header'i aç
-                header_data = struct.unpack("<IBBBBIIIHH", data[:26])
+                #header_data = struct.unpack("<IBBBBIIIHH", data[:26])
+                header_data = struct.unpack("!IBBBBIIQH", data[:26])
                 magic, version, msg_type, sender_id, reserved, seq, reply_to_seq, ts_ms, payload_len = header_data
                 
                 # Type: 10 = Heartbeat
