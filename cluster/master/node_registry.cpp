@@ -2,14 +2,16 @@
 #include <sstream>
 
 // hic yoksa kaydeder
-void NodeRegistry::update_heartbeat(uint8_t senderId, const std::string& heartbeatJson,
-                                    uint64_t nowMs, const sockaddr_in& from) {
+void NodeRegistry::update_heartbeat(...) {
   std::lock_guard<std::mutex> lk(mu_);
   auto& st = nodes_[senderId];
   st.id = senderId;
   st.lastHeartbeatJson = heartbeatJson;
   st.lastSeenMs = nowMs;
   st.lastAddr = from;
+
+  // telemetry bloğunu ayrıca sakla
+  st.lastTelemetryJson = minijson::get_object(heartbeatJson, "telemetry");
 }
 
 bool NodeRegistry::get_last_addr(uint8_t targetId, sockaddr_in& out) const {
@@ -39,4 +41,17 @@ std::string NodeRegistry::to_nodes_json(uint64_t nowMs) const {
   }
   oss << "]}";
   return oss.str();
+}
+
+
+bool NodeRegistry::get_telemetry_json(uint8_t id, std::string& outTelemetry, uint64_t& outAgeMs) const {
+  std::lock_guard<std::mutex> lk(mu_);
+  auto it = nodes_.find(id);
+  if (it == nodes_.end()) return false;
+  const auto& st = it->second;
+  if (st.lastSeenMs == 0 || st.lastTelemetryJson.empty()) return false;
+  uint64_t now = nowMs; // (bu fonksiyona nowMs parametresi de geçebilirsin)
+  outAgeMs = (now >= st.lastSeenMs) ? (now - st.lastSeenMs) : 999999;
+  outTelemetry = st.lastTelemetryJson;
+  return true;
 }

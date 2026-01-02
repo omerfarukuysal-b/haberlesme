@@ -28,3 +28,28 @@ inline std::string get(const std::string& json, const std::string& key) {
 }
 
 } // namespace minijson
+
+// "telemetry":{ ... } bloğunu substring olarak döndürür (çok minimal)
+inline std::string get_object(const std::string& json, const std::string& key) {
+  const std::string k = "\"" + key + "\"";
+  auto pos = json.find(k);
+  if (pos == std::string::npos) return "";
+  pos = json.find(':', pos);
+  if (pos == std::string::npos) return "";
+  pos++;
+  while (pos < json.size() && (json[pos] == ' ')) pos++;
+  if (pos >= json.size() || json[pos] != '{') return "";
+
+  int depth = 0;
+  size_t start = pos;
+  for (size_t i = pos; i < json.size(); i++) {
+    if (json[i] == '{') depth++;
+    else if (json[i] == '}') {
+      depth--;
+      if (depth == 0) {
+        return json.substr(start, i - start + 1);
+      }
+    }
+  }
+  return "";
+}

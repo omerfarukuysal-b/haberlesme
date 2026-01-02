@@ -7,7 +7,8 @@
 
 struct NodeState {
   uint8_t id = 0;
-  std::string lastHeartbeatJson;
+  std::string lastHeartbeatJson;   // komple heartbeat JSON
+  std::string lastTelemetryJson;   // sadece telemetry JSON (kolay endpoint için)
   uint64_t lastSeenMs = 0;
   sockaddr_in lastAddr{};
 };
@@ -18,6 +19,8 @@ public:
                         uint64_t nowMs, const sockaddr_in& from);
 
   bool get_last_addr(uint8_t targetId, sockaddr_in& out) const;
+
+  bool get_telemetry_json(uint8_t id, std::string& outTelemetry, uint64_t& outAgeMs) const;
 
   std::string to_nodes_json(uint64_t nowMs) const;
 

@@ -34,11 +34,13 @@ void UdpAgent::close() {
 void UdpAgent::run(uint8_t myId, const sockaddr_in& masterAddr, CommandHandler& handler) {
   std::atomic<uint32_t> seq{1};
 
+  TelemetryCollector collector;
+
   // Heartbeat thread
   std::thread hb([&]{
     using namespace std::chrono_literals;
     while (g_running) {
-      std::string p = heartbeat::make_payload();
+      std::string p = heartbeat::make_payload(collector);
       auto bytes = proto::encode(proto::MsgType::Heartbeat, myId, seq++, 0, p);
       ::sendto(sock_, bytes.data(), bytes.size(), 0, (sockaddr*)&masterAddr, sizeof(masterAddr));
       std::this_thread::sleep_for(1000ms);
