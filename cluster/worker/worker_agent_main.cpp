@@ -76,12 +76,20 @@ int main(int argc, char** argv) {
       std::cerr << "Mesh mode için en az bir başka node eklenmesi gerekiyor (--add-node)\n";
       return 1;
     }
-    std::cout << "Mesh Network started. id=" << id << " port=" << port 
-              << " nodes=" << network.node_count();
-    if (!webServerIp.empty()) {
-      std::cout << " web-server=" << webServerIp << ":" << webServerPort;
+    std::cout << "\n========================================\n";
+    std::cout << "Node " << id << " - MESH MODE\n";
+    std::cout << "========================================\n";
+    std::cout << "Local Port: " << port << "\n";
+    std::cout << "Mesh Nodes:\n";
+    for (const auto& n : network.get_all_nodes()) {
+      if (n.id != id) {
+        std::cout << "  - Node " << (int)n.id << ": " << n.ip << ":" << n.port << "\n";
+      }
     }
-    std::cout << "\n";
+    if (!webServerIp.empty()) {
+      std::cout << "Web Server: " << webServerIp << ":" << webServerPort << "\n";
+    }
+    std::cout << "========================================\n\n";
     agent.run_mesh((uint8_t)id, network, handler, webServerIp, (uint16_t)webServerPort);
   } else {
     if (masterIp.empty()) {

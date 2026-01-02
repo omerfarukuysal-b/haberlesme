@@ -45,7 +45,7 @@ def start_heartbeat_listener():
     listening_socket.bind(("0.0.0.0", LISTENING_NODE["port"]))
     listening_socket.settimeout(1)
     
-    print(f"Listening for heartbeats on port {LISTENING_NODE['port']}...")
+    print(f"[Web App] Listening for heartbeats on port {LISTENING_NODE['port']}...")
     
     while True:
         try:
@@ -57,6 +57,7 @@ def start_heartbeat_listener():
                 
                 # Type: 10 = Heartbeat
                 if msg_type == 10 and magic == 0x52504934:  # "RPI4"
+                    print(f"[Web App] Heartbeat received from Node {sender_id} ({addr[0]}:{addr[1]}) - Size: {len(data)} bytes")
                     payload_str = data[26:26+payload_len].decode("utf-8", errors="ignore")
                     try:
                         payload = json.loads(payload_str)
@@ -73,12 +74,13 @@ def start_heartbeat_listener():
                                     "lastSeen": datetime.now().isoformat(),
                                     "telemetry": payload.get("telemetry", {})
                                 }
+                                print(f"[Web App] Node {sender_id} data updated. Telemetry: {payload.get('telemetry', {})}")
                     except Exception as e:
-                        print(f"Error parsing heartbeat: {e}")
+                        print(f"[Web App] Error parsing heartbeat from Node {sender_id}: {e}")
         except socket.timeout:
             pass
         except Exception as e:
-            print(f"Heartbeat listener error: {e}")
+            print(f"[Web App] Heartbeat listener error: {e}")
             import time
             time.sleep(0.1)
 
@@ -123,6 +125,7 @@ def send_udp_command(target_id: int, action: str, arg: str = "") -> str:
         packet = header + payload_bytes
         
         # Node'a gönder
+        print(f"[Web App] Sending command to Node {target_id} ({node['ip']}:{node['port']}): {action}")
         udp_socket.sendto(packet, (node["ip"], node["port"]))
         
         # Yanıt al
@@ -131,11 +134,14 @@ def send_udp_command(target_id: int, action: str, arg: str = "") -> str:
             if len(data) >= 26:
                 response_payload = data[26:]
                 response_str = response_payload.decode("utf-8", errors="ignore")
+                print(f"[Web App] Response received from Node {target_id}: {response_str}")
                 return response_str
         except socket.timeout:
+            print(f"[Web App] Timeout waiting for response from Node {target_id}")
             return json.dumps({"ok": False, "error": "Timeout waiting for response"})
         
     except Exception as e:
+        print(f"[Web App] Error sending command to Node {target_id}: {e}")
         return json.dumps({"ok": False, "error": str(e)})
 
 

@@ -57,6 +57,8 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandH
       for (const auto& node : other_nodes) {
         sockaddr_in addr = node.to_sockaddr();
         ::sendto(sock_, bytes.data(), bytes.size(), 0, (sockaddr*)&addr, sizeof(addr));
+        std::cout << "[Node " << (int)myId << "] Heartbeat sent to Node " << (int)node.id 
+                  << " (" << node.ip << ":" << node.port << ") - Size: " << bytes.size() << " bytes\n";
       }
       
       // Web app'e de heartbeat gönder (eğer IP verilmişse)
@@ -66,6 +68,8 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandH
         web_addr.sin_port = htons(webServerPort);
         inet_pton(AF_INET, webServerIp.c_str(), &web_addr.sin_addr);
         ::sendto(sock_, bytes.data(), bytes.size(), 0, (sockaddr*)&web_addr, sizeof(web_addr));
+        std::cout << "[Node " << (int)myId << "] Heartbeat sent to Web App (" 
+                  << webServerIp << ":" << webServerPort << ") - Size: " << bytes.size() << " bytes\n";
       }
       
       std::this_thread::sleep_for(1000ms);
@@ -84,13 +88,27 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandH
     if (!proto::decode(buf.data(), (size_t)n, pkt)) continue;
 
     const auto type = (proto::MsgType)pkt.hdr.type;
-    if (type == proto::MsgType::Command) {
+    
+    // Paket türüne göre log yaz
+    char remote_ip[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &remote.sin_addr, remote_ip, INET_ADDRSTRLEN);
+    uint16_t remote_port = ntohs(remote.sin_port);
+    
+    if (type == proto::MsgType::Heartbeat) {
+      std::cout << "[Node " << (int)myId << "] Heartbeat from Node " << (int)pkt.hdr.senderId 
+                << " (" << remote_ip << ":" << remote_port << ") - Size: " << n << " bytes\n";
+    } else if (type == proto::MsgType::Command) {
+      std::cout << "[Node " << (int)myId << "] Command from Node " << (int)pkt.hdr.senderId 
+                << " (" << remote_ip << ":" << remote_port << "): " << pkt.payload << "\n";
       // Komut aldık, işle ve yanıt gönder
       std::string respPayload = handler.handle(pkt.payload);
       auto respBytes = proto::encode(proto::MsgType::Response, myId, seq++, pkt.hdr.seq, respPayload);
       ::sendto(sock_, respBytes.data(), respBytes.size(), 0, (sockaddr*)&remote, sizeof(remote));
+      std::cout << "[Node " << (int)myId << "] Response sent to Node " << (int)pkt.hdr.senderId << "\n";
+    } else if (type == proto::MsgType::Response) {
+      std::cout << "[Node " << (int)myId << "] Response from Node " << (int)pkt.hdr.senderId 
+                << " (" << remote_ip << ":" << remote_port << "): " << pkt.payload << "\n";
     }
-    // Heartbeat mesajları işleme gerek yok, sadece alındığını biliyoruz
   }
 
   hb.join();
