@@ -16,6 +16,7 @@ with open(CONFIG_FILE, "r") as f:
 
 NODES_CONFIG = {node["id"]: node for node in config["nodes"]}
 WEB_CONFIG = config.get("web_server", {"host": "0.0.0.0", "port": 8000})
+HEARTBEAT_PORT = config.get("heartbeat_port", 9000)  # Heartbeat dinleme portu
 
 # Listening node (Node 1'e bağlan)
 LISTENING_NODE = NODES_CONFIG[1]  # Node 1 heartbeat'leri web'e gönderecek
@@ -42,10 +43,10 @@ def start_heartbeat_listener():
     init_socket()
     listening_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    listening_socket.bind(("0.0.0.0", LISTENING_NODE["port"]))
+    listening_socket.bind(("0.0.0.0", HEARTBEAT_PORT))
     listening_socket.settimeout(1)
     
-    print(f"[Web App] Listening for heartbeats on port {LISTENING_NODE['port']}...")
+    print(f"[Web App] Listening for heartbeats on port {HEARTBEAT_PORT}...")
     
     while True:
         try:
@@ -205,6 +206,8 @@ if __name__ == "__main__":
     import uvicorn
     host = WEB_CONFIG.get("host", "0.0.0.0")
     port = WEB_CONFIG.get("port", 8000)
-    print(f"Web server starting on {host}:{port}")
-    print(f"Listening for heartbeats from Node 1 ({LISTENING_NODE['ip']}:{LISTENING_NODE['port']})")
+    print(f"\n[Web App] Web server starting on {host}:{port}")
+    print(f"[Web App] Listening for heartbeats from Node 1 on UDP port {HEARTBEAT_PORT}")
+    print(f"[Web App] Node 1 configuration: {LISTENING_NODE['ip']}:{LISTENING_NODE['port']}")
+    print(f"[Web App] Make sure Node 1 is running with: --web-server <YOUR_IP> --web-port {HEARTBEAT_PORT}\n")
     uvicorn.run(app, host=host, port=port)
