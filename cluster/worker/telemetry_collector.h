@@ -1,6 +1,6 @@
 #pragma once
 #include "../common/telemetry.h"
-
+#include <mutex>
 class TelemetryCollector {
 public:
   Telemetry sample();
