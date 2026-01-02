@@ -3,11 +3,13 @@
 #include <atomic>
 #include <cstdint>
 #include <string>
+#include <mutex>
 #include <vector>
 #include "../common/runtime.h"
 #include "../common/node_config.h"
 
 class CommandHandler;
+class TelemetryCollector; 
 
 class UdpAgent
 {

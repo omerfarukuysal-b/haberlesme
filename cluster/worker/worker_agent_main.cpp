@@ -82,8 +82,10 @@ int main(int argc, char **argv)
     if (!agent.open_and_bind((uint16_t)port))
         return 1;
 
-    CommandHandler handler;
 
+    TelemetryCollector collector;
+    CommandHandler handler(collector);
+    
     if (meshMode)
     {
         if (network.node_count() == 0)
