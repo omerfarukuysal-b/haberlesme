@@ -40,9 +40,9 @@ bool UdpAgent::send_command(const sockaddr_in& dst, uint8_t senderId, uint32_t s
 }
 
 void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandHandler& handler,
+                        TelemetryCollector& collector, // <--- Parametre
                         const std::string& webServerIp, uint16_t webServerPort) {
   std::atomic<uint32_t> seq{1};
-  TelemetryCollector collector;
   
   // Heartbeat thread - diğer node'lara ve web app'e heartbeat gönder
   std::thread hb([&]{
