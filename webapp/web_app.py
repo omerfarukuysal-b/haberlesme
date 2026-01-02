@@ -43,3 +43,7 @@ def api_command(target: int, action: str, arg: str = ""):
     resp = ipc_request(req)
     return __import__("json").loads(resp)
 
+@app.get("/api/telemetry/{node_id}")
+def api_telemetry(node_id: int):
+    resp = ipc_request(f'{{"op":"telemetry","id":{node_id}}}')
+    return __import__("json").loads(resp)
