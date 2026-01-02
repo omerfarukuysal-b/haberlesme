@@ -104,6 +104,28 @@ std::string IpcServer::handle_request(const std::string& line,
     if (resp.empty()) return "{\"ok\":false,\"error\":\"timeout\"}";
     return std::string("{\"ok\":true,\"response\":") + resp + "}";
   }
+  if (op == "telemetry") {
+    const std::string idStr = minijson::get(line, "id");
+    if (idStr.empty()) return "{\"ok\":false,\"error\":\"missing id\"}";
+    int id = 0; try { id = std::stoi(idStr); } catch(...) { id = 0; }
+    if (id <= 0 || id > 255) return "{\"ok\":false,\"error\":\"bad id\"}";
+
+    std::string tel;
+    uint64_t age = 0;
+    // (burada NodeRegistry'den çek)
+    // örnek: registry.get_telemetry_json((uint8_t)id, tel, age, proto::now_ms());
+
+    // Basit versiyon (getter'ı ona göre ayarla):
+    // if (!registry.get_telemetry_json((uint8_t)id, tel, age)) ...
+
+    if (!registry.get_telemetry_json((uint8_t)id, tel, age, proto::now_ms())) {
+        return "{\"ok\":false,\"error\":\"no telemetry\"}";
+    }
+    return std::string("{\"ok\":true,\"id\":") + std::to_string(id) +
+            ",\"ageMs\":" + std::to_string(age) +
+            ",\"telemetry\":" + tel + "}";
+    }
+
 
   return "{\"ok\":false,\"error\":\"unknown op\"}";
 }
