@@ -2,7 +2,8 @@
 #include <sstream>
 
 // hic yoksa kaydeder
-void NodeRegistry::update_heartbeat(...) {
+void NodeRegistry::update_heartbeat(uint8_t senderId, const std::string& heartbeatJson,
+                        uint64_t nowMs, const sockaddr_in& from) {
   std::lock_guard<std::mutex> lk(mu_);
   auto& st = nodes_[senderId];
   st.id = senderId;
