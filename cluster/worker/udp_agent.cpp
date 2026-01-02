@@ -1,6 +1,7 @@
 #include "udp_agent.h"
 #include "command_handler.h"
 #include "heartbeat.h"
+#include "telemetry_collector.h"
 #include "../common/protocol.h"
 
 #include <sys/socket.h>

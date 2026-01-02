@@ -14,7 +14,9 @@ std::string CommandHandler::get_uptime_sec() {
   FILE* f = std::fopen("/proc/uptime", "r");
   if (!f) return "0";
   double up = 0.0;
-  std::fscanf(f, "%lf", &up);
+  if (std::fscanf(f, "%lf", &up) != 1) {
+      up = 0.0; // Okuma başarısızsa varsayılan bir değer atayın
+  }
   std::fclose(f);
   long sec = (long)up;
   return std::to_string(sec);
