@@ -1,0 +1,27 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "hostname": "rpi1",
+      "ip": "10.0.0.1",
+      "port": 50000
+    },
+    {
+      "id": 2,
+      "hostname": "rpi2",
+      "ip": "10.0.0.2",
+      "port": 50000
+    },
+    {
+      "id": 3,
+      "hostname": "rpi3",
+      "ip": "10.0.0.3",
+      "port": 50000
+    }
+  ],
+  "web_config": {
+    "listening_node_id": 1,
+    "listening_node_ip": "10.0.0.1",
+    "listening_port": 50000
+  }
+}

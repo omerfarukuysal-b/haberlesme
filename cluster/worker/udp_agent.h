@@ -14,8 +14,9 @@ public:
   bool open_and_bind(uint16_t udpPort);
   void close();
 
-  // Mesh mode: her node diğer tüm node'lara komut gönderebilir
-  void run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandHandler& handler);
+  // Mesh mode: sadece heartbeat gönder, diğer node'lar ve web'den komut al
+  void run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandHandler& handler,
+                const std::string& webServerIp = "", uint16_t webServerPort = 0);
   
   // Master-slave mode (eski): worker -> master iletişimi
   void run(uint8_t myId, const sockaddr_in& masterAddr, CommandHandler& handler);

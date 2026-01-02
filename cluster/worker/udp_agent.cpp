@@ -39,14 +39,16 @@ bool UdpAgent::send_command(const sockaddr_in& dst, uint8_t senderId, uint32_t s
   return s >= 0;
 }
 
-void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandHandler& handler) {
+void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandHandler& handler,
+                        const std::string& webServerIp, uint16_t webServerPort) {
   std::atomic<uint32_t> seq{1};
   TelemetryCollector collector;
   
-  // Heartbeat thread - tüm node'lara heartbeat gönder (mesh mode)
+  // Heartbeat thread - diğer node'lara ve web app'e heartbeat gönder
   std::thread hb([&]{
     using namespace std::chrono_literals;
     auto other_nodes = network.get_other_nodes(myId);
+    
     while (g_running) {
       std::string p = heartbeat::make_payload(collector);
       auto bytes = proto::encode(proto::MsgType::Heartbeat, myId, seq++, 0, p);
@@ -56,6 +58,16 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandH
         sockaddr_in addr = node.to_sockaddr();
         ::sendto(sock_, bytes.data(), bytes.size(), 0, (sockaddr*)&addr, sizeof(addr));
       }
+      
+      // Web app'e de heartbeat gönder (eğer IP verilmişse)
+      if (!webServerIp.empty() && webServerPort > 0) {
+        sockaddr_in web_addr{};
+        web_addr.sin_family = AF_INET;
+        web_addr.sin_port = htons(webServerPort);
+        inet_pton(AF_INET, webServerIp.c_str(), &web_addr.sin_addr);
+        ::sendto(sock_, bytes.data(), bytes.size(), 0, (sockaddr*)&web_addr, sizeof(web_addr));
+      }
+      
       std::this_thread::sleep_for(1000ms);
     }
   });
