@@ -78,5 +78,16 @@ Telemetry TelemetryCollector::sample() {
     }
   }
 
+  {
+      std::lock_guard<std::mutex> lock(mu_);
+      t.message = current_msg_;
+  }
+
   return t;
+}
+
+
+void TelemetryCollector::set_message(const std::string& msg) {
+  std::lock_guard<std::mutex> lock(mu_);
+  current_msg_ = msg;
 }

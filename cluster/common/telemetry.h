@@ -4,14 +4,16 @@
 #include <sstream>
 
 struct Telemetry {
-  uint64_t tsMs = 0;        // ölçüm zamanı
-  float cpuTempC = 0.0f;    // cpu sıcaklığı
-  float cpuUsagePct = 0.0f; // cpu kullanım %
-  uint32_t memUsedMB = 0;   // kullanılan ram
-  uint32_t memTotalMB = 0;  // toplam ram
-  uint32_t uptimeSec = 0;   // uptime
+  uint64_t tsMs = 0;
+  float cpuTempC = 0.0f;
+  float cpuUsagePct = 0.0f;
+  uint32_t memUsedMB = 0;
+  uint32_t memTotalMB = 0;
+  uint32_t uptimeSec = 0;
+  
+  // YENİ: Dinamik mesaj alanı
+  std::string message; 
 
-  // Basit JSON üretimi (dependency yok)
   std::string to_json() const {
     std::ostringstream o;
     o << "{"
@@ -20,7 +22,8 @@ struct Telemetry {
       << "\"cpuUsagePct\":" << cpuUsagePct << ","
       << "\"memUsedMB\":" << memUsedMB << ","
       << "\"memTotalMB\":" << memTotalMB << ","
-      << "\"uptimeSec\":" << uptimeSec
+      << "\"uptimeSec\":" << uptimeSec << ","
+      << "\"message\":\"" << message << "\""  // JSON'a ekledik
       << "}";
     return o.str();
   }
