@@ -3,7 +3,7 @@
 #include <atomic>
 #include <cstdint>
 #include <string>
-#include "common/runtime.h"
+#include "../common/runtime.h"
 
 class CommandHandler;
 
