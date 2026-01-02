@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include "../common/mini_json.h"
 
 struct NodeState {
   uint8_t id = 0;
