@@ -120,7 +120,7 @@ def send_udp_command(target_id: int, action: str, arg: str = "") -> str:
         ts_ms = 0
         payload_len = len(payload_bytes)
         
-        header = struct.pack("<IBBBBIIIHH",
+        header = struct.pack("!IBBBBIIQH",
                            magic, version, msg_type, sender_id, reserved,
                            seq, reply_to_seq, ts_ms, payload_len)
         
