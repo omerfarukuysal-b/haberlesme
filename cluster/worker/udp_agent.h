@@ -3,7 +3,9 @@
 #include <atomic>
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "../common/runtime.h"
+#include "../common/node_config.h"
 
 class CommandHandler;
 
@@ -12,7 +14,15 @@ public:
   bool open_and_bind(uint16_t udpPort);
   void close();
 
+  // Mesh mode: her node diğer tüm node'lara komut gönderebilir
+  void run_mesh(uint8_t myId, const mesh::MeshNetwork& network, CommandHandler& handler);
+  
+  // Master-slave mode (eski): worker -> master iletişimi
   void run(uint8_t myId, const sockaddr_in& masterAddr, CommandHandler& handler);
+  
+  // Belirli bir node'a komut gönder
+  bool send_command(const sockaddr_in& dst, uint8_t senderId, uint32_t seq,
+                    const std::string& payload);
 
 private:
   int sock_ = -1;

@@ -17,6 +17,8 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 add_library(cluster_common
   common/protocol.cpp
   common/net_utils.cpp
+  common/node_config.cpp
+  common/command_dispatcher.cpp
 )
 
 target_include_directories(cluster_common PUBLIC
