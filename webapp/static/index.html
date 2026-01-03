@@ -138,14 +138,77 @@ async function selectNode(id) {
   await refreshTelemetryOnce();
 }
 
+// async function refreshTelemetryOnce() {
+//   if (selectedId == null) return;
+//   try {
+//     const res = await fetch(`/api/telemetry/${selectedId}`);
+//     const data = await res.json();
+//     document.getElementById("telemetryView").innerText = JSON.stringify(data, null, 2);
+//   } catch (e) {
+//     document.getElementById("telemetryView").innerText = JSON.stringify({ok:false, error:"fetch failed"}, null, 2);
+//     console.error(e);
+//   }
+// }
 async function refreshTelemetryOnce() {
   if (selectedId == null) return;
   try {
     const res = await fetch(`/api/telemetry/${selectedId}`);
     const data = await res.json();
+    
+    // 1. Ham JSON'u yine göster (Debug için)
     document.getElementById("telemetryView").innerText = JSON.stringify(data, null, 2);
+
+    // 2. Tablo Oluşturma Mantığı
+    let detailsHtml = "";
+    
+    // Telemetri verisi var mı kontrol et
+    if (data.telemetry) {
+        const tx = data.telemetry.tx_details || {};
+        const rx = data.telemetry.rx_details || {};
+        
+        // TX ve RX anahtarlarını birleştir (tüm komşuları bul)
+        const neighbors = new Set([...Object.keys(tx), ...Object.keys(rx)]);
+        
+        if (neighbors.size > 0) {
+            detailsHtml += `
+            <table border="1" style="border-collapse: collapse; width: 100%; margin-top: 10px; text-align: center;">
+                <tr style="background-color: #f0f0f0;">
+                    <th>Komşu Node</th>
+                    <th>Giden (TX)</th>
+                    <th>Gelen (RX)</th>
+                </tr>`;
+                
+            neighbors.forEach(nid => {
+                const txCount = tx[nid] || 0;
+                const rxCount = rx[nid] || 0;
+                // Paket kaybı tahmini (Basit renk kodlaması)
+                // (Not: RX tarafında ne kadar olması gerektiğini bilmediğimiz için 
+                // sadece sayıları gösteriyoruz)
+                detailsHtml += `
+                <tr>
+                    <td>Node <b>${nid}</b></td>
+                    <td style="color:blue">${txCount}</td>
+                    <td style="color:green">${rxCount}</td>
+                </tr>`;
+            });
+            detailsHtml += `</table>`;
+        } else {
+            detailsHtml = "<div class='muted'>Henüz trafik verisi yok.</div>";
+        }
+    }
+
+    // Tabloyu ekrana basmak için bir alan bul veya oluştur
+    let tableContainer = document.getElementById("trafficTable");
+    if (!tableContainer) {
+        // Eğer yoksa telemetryView altına ekle
+        const pre = document.getElementById("telemetryView");
+        tableContainer = document.createElement("div");
+        tableContainer.id = "trafficTable";
+        pre.parentNode.appendChild(tableContainer);
+    }
+    tableContainer.innerHTML = detailsHtml;
+
   } catch (e) {
-    document.getElementById("telemetryView").innerText = JSON.stringify({ok:false, error:"fetch failed"}, null, 2);
     console.error(e);
   }
 }

@@ -86,8 +86,17 @@ Telemetry TelemetryCollector::sample() {
   return t;
 }
 
-
 void TelemetryCollector::set_message(const std::string& msg) {
   std::lock_guard<std::mutex> lock(mu_);
   current_msg_ = msg;
+}
+
+void TelemetryCollector::inc_tx(uint8_t targetId) {
+  std::lock_guard<std::mutex> lock(mu_);
+  tx_map_[targetId]++;
+}
+
+void TelemetryCollector::inc_rx(uint8_t senderId) {
+  std::lock_guard<std::mutex> lock(mu_);
+  rx_map_[senderId]++;
 }

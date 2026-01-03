@@ -77,6 +77,26 @@ def start_heartbeat_listener():
                                     "telemetry": payload.get("telemetry", {})
                                 }
                                 print(f"[Web App] Node {sender_id} data updated. Telemetry: {payload.get('telemetry', {})}")
+                        telemetry = payload.get("telemetry", {})
+                        # Eğer pakette trafik detayı varsa yazdır
+                        if "tx_details" in telemetry:
+                            print(f"\n[LOG] Node {sender_id} İstatistik Raporu:")
+                            
+                            # TX (Gönderilen)
+                            tx_map = telemetry.get("tx_details", {})
+                            if tx_map:
+                                print(f"  -> Giden Paketler (TX):")
+                                for target, count in tx_map.items():
+                                    print(f"     Node {sender_id} -> Node {target} : {count} pkt")
+                            
+                            # RX (Alınan)
+                            rx_map = telemetry.get("rx_details", {})
+                            if rx_map:
+                                print(f"  <- Gelen Paketler (RX):")
+                                for source, count in rx_map.items():
+                                    print(f"     Node {sender_id} <- Node {source} : {count} pkt")
+                            print("-" * 40)
+                            
                     except Exception as e:
                         print(f"[Web App] Error parsing heartbeat from Node {sender_id}: {e}")
         except socket.timeout:

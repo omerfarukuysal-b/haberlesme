@@ -68,6 +68,7 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork &network, CommandH
       for (const auto& node : other_nodes) {
         sockaddr_in addr = node.to_sockaddr();
         ::sendto(sock_, bytes.data(), bytes.size(), 0, (sockaddr*)&addr, sizeof(addr));
+        collector.inc_tx(node.id);
         std::cout << "[Node " << (int)myId << "] Heartbeat sent to Node " << (int)node.id 
                   << " (" << node.ip << ":" << node.port << ") - Size: " << bytes.size() << " bytes\n";
       }
@@ -100,6 +101,8 @@ void UdpAgent::run_mesh(uint8_t myId, const mesh::MeshNetwork &network, CommandH
         if (!proto::decode(buf.data(), (size_t)n, pkt))
             continue;
 
+        collector.inc_rx(pkt.hdr.senderId);
+        
         const auto type = (proto::MsgType)pkt.hdr.type;
 
         // Paket türüne göre log yaz
